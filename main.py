@@ -6,8 +6,6 @@ from sqlalchemy import create_engine, Column, Integer, String, Numeric,  MetaDat
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from pydantic import BaseModel
-from datetime import date
 from fastapi import FastAPI, Depends, HTTPException
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -23,7 +21,7 @@ dataframes_atualizados = {}
 
 app = FastAPI()
 
-@as_declarative
+@as_declarative()
 class Base:
     @declared_attr
     def __tablename__(cls):
