@@ -30,7 +30,7 @@ class Base:
         return cls.__name__.lower()
     
     id = Column(Integer, primary_key=True, index=True)
-    ano = Column(Integer, nullabe=False)
+    ano = Column(Integer, nullable=False)
     receita_liquida = Column(Numeric(10, 4), nullable=False)
     coef_var_receita_liquida = Column(String, nullable=False)
     custo_mercadorias = Column(Numeric(10, 4), nullable=False)
