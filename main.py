@@ -5,6 +5,7 @@ import warnings
 from sqlalchemy import create_engine, Column, Integer, String, Numeric,  MetaData 
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from pydantic import BaseModel
 from datetime import date
 from fastapi import FastAPI, Depends, HTTPException
@@ -230,6 +231,23 @@ def tratar_df(df):
         replace_outliers_by_median(df[colunas_numericas], col)
         df[col].fillna(df[col].median(), inplace=True)
     return df
+
+# Rota para buscar todos os dados de uma tabela
+@app.get("/{name}/dados")
+def get_table_data(name: str, db: Session = Depends(get_db_local)):
+    tabela = get_table(name, metadata)  # Busca a tabela pelo nome
+    
+    query = select([tabela])  # Cria a query para selecionar todos os dados da tabela
+    result = db.execute(query).fetchall()  # Executa a query e busca todos os resultados
+
+    # Verifica se existem dados
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Nenhum dado encontrado na tabela {name}")
+
+    # Formata o resultado em uma lista de dicionários
+    dados = [dict(r) for r in result]
+
+    return {"dados": dados}
 
 # Rota para inserir dados na tabela dinamicamente
 @app.post("/{name}/")
