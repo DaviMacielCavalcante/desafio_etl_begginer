@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 import os 
 import warnings
-from sqlalchemy import create_engine, Column, Integer, String, Numeric,  MetaData 
+from sqlalchemy import create_engine, Column, Integer, String, Numeric,  MetaData,Table, select 
+from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import select
 from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException
@@ -16,6 +17,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autoflush=False,autocommit=False, bind=engine)
+metadata = MetaData()
 
 dataframes = {}
 dataframes_atualizados = {}
@@ -307,11 +309,11 @@ def create(name: str, base: BaseCreate, db: Session = Depends(get_db_local)):
     )
     db.execute(query)
     db.commit()
-    return {"message": f"Venda inserida na tabela {table_name}"}
+    return {"message": f"Venda inserida na tabela {name}"}
 
 # Rota para atualizar dados na tabela dinamicamente
 @app.put("/{name}/{id}/receita_liquida")
-def update(name: str, base_id: int, nova_receita_liquida: float, db: Session = Depends(get_db)):
+def update(name: str, base_id: int, nova_receita_liquida: float, db: Session = Depends(get_db_local)):
     tabela = get_table(name, metadata)
     query = tabela.update().where(tabela.c.id == id).values(
         receita_liquida = nova_receita_liquida
