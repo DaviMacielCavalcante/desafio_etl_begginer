@@ -233,7 +233,19 @@ def tratar_df(df):
         df[col].fillna(df[col].median(), inplace=True)
     return df
 
-# Rota para buscar todos os dados de uma tabela
+Base.metadata.create_all(bind=engine)
+
+carregar_dfs('./datasets/')    
+
+for key,value in dataframes.items():
+    if key != "notas":
+        dataframes_atualizados[key] = tratar_df(value)
+
+
+for key,value in dataframes_atualizados.items():
+    value.to_sql(f'{key}', engine, if_exists='replace', index=False)
+
+    # Rota para buscar todos os dados de uma tabela
 @app.get("/{name}/dados")
 def get_table_data(name: str, db: Session = Depends(get_db_local)):
     tabela = get_table(name, metadata)  # Busca a tabela pelo nome
@@ -322,13 +334,3 @@ def update(name: str, base_id: int, nova_receita_liquida: float, db: Session = D
     
     db.commit()
     return {"message": f"Linha {id} atualizada na tabela {name}"}
-
-carregar_dfs('./datasets/')    
-
-for key,value in dataframes.items():
-    if key != "notas":
-        dataframes_atualizados[key] = tratar_df(value)
-
-
-for key,value in dataframes_atualizados.items():
-    value.to_sql(f'{key}', engine, if_exists='replace', index=False)
