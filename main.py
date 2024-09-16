@@ -238,7 +238,7 @@ def tratar_df(df):
 def get_table_data(name: str, db: Session = Depends(get_db_local)):
     tabela = get_table(name, metadata)  # Busca a tabela pelo nome
     
-    query = select([tabela])  # Cria a query para selecionar todos os dados da tabela
+    query = select(tabela.columns)  # Cria a query para selecionar todos os dados da tabela
     result = db.execute(query).fetchall()  # Executa a query e busca todos os resultados
 
     # Verifica se existem dados
