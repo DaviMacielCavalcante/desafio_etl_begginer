@@ -88,7 +88,7 @@ def get_db_local():
     finally:
         db.close()
 
-def get_table(name: str, metadata: Metadata):
+def get_table(name: str, metadata: MetaData):
     try:
         return Table(name, metadata, autoload_with=engine)
     except NoSuchTableError:
