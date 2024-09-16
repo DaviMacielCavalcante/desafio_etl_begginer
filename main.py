@@ -246,7 +246,7 @@ def get_table_data(name: str, db: Session = Depends(get_db_local)):
         raise HTTPException(status_code=404, detail=f"Nenhum dado encontrado na tabela {name}")
 
     # Formata o resultado em uma lista de dicionários
-    dados = [dict(r) for r in result]
+    dados = [dict(r._mapping) for r in result]
 
     return {"dados": dados}
 
