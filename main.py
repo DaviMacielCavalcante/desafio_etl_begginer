@@ -231,17 +231,6 @@ def tratar_df(df):
         df[col].fillna(df[col].median(), inplace=True)
     return df
 
-
-carregar_dfs('./datasets/')    
-
-for key,value in dataframes.items():
-    if key != "notas":
-        dataframes_atualizados[key] = tratar_df(value)
-
-
-for key,value in dataframes_atualizados.items():
-    value.to_sql(f'{key}', engine, if_exists='replace', index=False)
-
 # Rota para inserir dados na tabela dinamicamente
 @app.post("/{name}/")
 def create(name: str, base: BaseCreate, db: Session = Depends(get_db_local)):
@@ -314,3 +303,13 @@ def update(name: str, base_id: int, nova_receita_liquida: float, db: Session = D
     
     db.commit()
     return {"message": f"Linha {id} atualizada na tabela {name}"}
+
+carregar_dfs('./datasets/')    
+
+for key,value in dataframes.items():
+    if key != "notas":
+        dataframes_atualizados[key] = tratar_df(value)
+
+
+for key,value in dataframes_atualizados.items():
+    value.to_sql(f'{key}', engine, if_exists='replace', index=False)
