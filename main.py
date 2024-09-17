@@ -326,7 +326,7 @@ def create(name: str, base: BaseCreate, db: Session = Depends(get_db_local)):
 
 # Rota para atualizar dados na tabela dinamicamente
 @app.put("/{name}/{id}/receita_liquida")
-def update(name: str, base_id: int, nova_receita_liquida: float, db: Session = Depends(get_db_local)):
+def update(name: str, id: int, nova_receita_liquida: float, db: Session = Depends(get_db_local)):
     tabela = get_table(name, metadata)
     query = tabela.update().where(tabela.c.id == id).values(
         receita_liquida = nova_receita_liquida
