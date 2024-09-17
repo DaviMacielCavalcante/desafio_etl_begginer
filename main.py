@@ -99,6 +99,7 @@ def get_table(name: str, metadata: MetaData):
 
 
 class BaseCreate(BaseModel):
+    id: int
     ano: int
     receita_liquida: float
     coef_var_receita_liquida: str
