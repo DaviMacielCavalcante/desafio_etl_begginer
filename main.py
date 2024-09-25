@@ -5,15 +5,15 @@ from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# Database configuration
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Declarative base
+
 Base = declarative_base()
 
-# Modelo genérico para as tabelas existentes
+
 class BaseTable(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True, index=True)
@@ -44,7 +44,7 @@ class BaseTable(Base):
     pessoal_ocupado = Column(Numeric(12, 2), nullable=False)
     numero_empresas = Column(Numeric(12, 2), nullable=False)
 
-# Modelos SQLAlchemy para as tabelas existentes
+
 class Telecom(BaseTable):
     __tablename__ = "telecom"
 
@@ -60,7 +60,7 @@ class EdIntegradasImpressao(BaseTable):
 class AgenciaNoticias(BaseTable):
     __tablename__ = "agencia_noticias"
 
-# Pydantic Models para validação
+
 class DataEntry(BaseModel):
     ano: int
     receita_liquida: float
