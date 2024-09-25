@@ -16,6 +16,7 @@ Base = declarative_base()
 # Modelo genérico para as tabelas existentes
 class BaseTable(Base):
     __abstract__ = True
+    id = Column(Integer, primary_key=True, index=True)
     ano = Column(Integer, unique=True, nullable=False)
     receita_liquida = Column(Numeric(12, 2), nullable=False)
     custo_mercadorias = Column(Numeric(12, 2), nullable=False)
