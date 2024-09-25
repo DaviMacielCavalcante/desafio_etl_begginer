@@ -1,123 +1,162 @@
-import pandas as pd
-import numpy as np
-import os 
-import warnings
+import os
+from sqlalchemy import create_engine, Column, Integer, Numeric
+from sqlalchemy.orm import sessionmaker, declarative_base
+from fastapi import FastAPI, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from sqlalchemy import create_engine, text
-
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=pd.errors.SettingWithCopyWarning)
-pd.options.display.float_format = '{:.2f}'.format
-
-# DATABASE_URL = os.getenv("DATABASE_URL")
-
-DATABASE_URL = "postgresql://pizza_man:root@localhost:5432/etl_beg"
+# Database configuration
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-dataframes = {}
-dataframes_atualizados = {}
+# Declarative base
+Base = declarative_base()
 
-def executar_sql(sql_file_path):
-    with open(sql_file_path, 'r') as file:
-        sql_query = file.read()
-    comandos = sql_query.split(';')
+# Modelo genérico para as tabelas existentes
+class BaseTable(Base):
+    __abstract__ = True
+    id = Column(Integer, primary_key=True, index=True)
+    ano = Column(Integer, unique=True, nullable=False)
+    receita_liquida = Column(Numeric(12, 2), nullable=False)
+    custo_mercadorias = Column(Numeric(12, 2), nullable=False)
+    subvencoes_receitas_op = Column(Numeric(12, 2), nullable=False)
+    valor_bruto_producao = Column(Numeric(12, 2), nullable=False)
+    consumo_intermediario_total = Column(Numeric(12, 2), nullable=False)
+    consumo_mercadorias_reposicao = Column(Numeric(12, 2), nullable=False)
+    consumo_combustiveis = Column(Numeric(12, 2), nullable=False)
+    consumo_servicos_terceiros = Column(Numeric(12, 2), nullable=False)
+    consumo_alugueis_imoveis = Column(Numeric(12, 2), nullable=False)
+    consumo_seguros = Column(Numeric(12, 2), nullable=False)
+    consumo_comunicacao = Column(Numeric(12, 2), nullable=False)
+    consumo_energia_gas_agua = Column(Numeric(12, 2), nullable=False)
+    consumo_outros_custos = Column(Numeric(12, 2), nullable=False)
+    valor_adicionado_bruto = Column(Numeric(12, 2), nullable=False)
+    gastos_pessoal_total = Column(Numeric(12, 2), nullable=False)
+    gastos_salarios_remuneracoes = Column(Numeric(12, 2), nullable=False)
+    gastos_previdencia_social = Column(Numeric(12, 2), nullable=False)
+    gastos_fgts = Column(Numeric(12, 2), nullable=False)
+    gastos_previdencia_privada = Column(Numeric(12, 2), nullable=False)
+    gastos_indenizacoes_trabalhistas = Column(Numeric(12, 2), nullable=False)
+    gastos_beneficios_empregados = Column(Numeric(12, 2), nullable=False)
+    pis_folha_pagamento = Column(Numeric(12, 2), nullable=False)
+    excedente_operacional_bruto = Column(Numeric(12, 2), nullable=False)
+    pessoal_ocupado = Column(Numeric(12, 2), nullable=False)
+    numero_empresas = Column(Numeric(12, 2), nullable=False)
 
-    with engine.connect() as conn:
-        for comando in comandos:
-            comando = comando.strip()
-            if comando:
-                conn.execute(text(comando))
+# Modelos SQLAlchemy para as tabelas existentes
+class Telecom(BaseTable):
+    __tablename__ = "telecom"
 
+class Ti(BaseTable):
+    __tablename__ = "ti"
 
-def replace_outliers_by_median(df, col):
-    """
-Função criada para substituir outliers de um pequeno conjunto de dados pela mediana. 
-Obs: Usar apenas em colunas que você sabe, via boxplot, que possuam outliers.
-    """
-    # Calcular os quartis e o intervalo interquartil (IQR)
-    Q1 = df[col].quantile(0.25)
-    Q3 = df[col].quantile(0.75)
-    IQR = Q3 - Q1
+class ServAudiovisuais(BaseTable):
+    __tablename__ = "serv_audiovisuais"
 
-    # Definir os limites para outliers
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
+class EdIntegradasImpressao(BaseTable):
+    __tablename__ = "ed_e_ed_integradas_a_impressao"
 
-    # Calcular a mediana
-    median = df[col].median()
+class AgenciaNoticias(BaseTable):
+    __tablename__ = "agencia_noticias"
 
-    # Substituir os outliers pela mediana
-    df.loc[df[col] < lower_bound, df[col]] = median
-    df.loc[df[col] > upper_bound, df[col]] = median
+# Pydantic Models para validação
+class DataEntry(BaseModel):
+    ano: int
+    receita_liquida: float
+    custo_mercadorias: float
+    subvencoes_receitas_op: float
+    valor_bruto_producao: float
+    consumo_intermediario_total: float
+    consumo_mercadorias_reposicao: float
+    consumo_combustiveis: float
+    consumo_servicos_terceiros: float
+    consumo_alugueis_imoveis: float
+    consumo_seguros: float
+    consumo_comunicacao: float
+    consumo_energia_gas_agua: float
+    consumo_outros_custos: float
+    valor_adicionado_bruto: float
+    gastos_pessoal_total: float
+    gastos_salarios_remuneracoes: float
+    gastos_previdencia_social: float
+    gastos_fgts: float
+    gastos_previdencia_privada: float
+    gastos_indenizacoes_trabalhistas: float
+    gastos_beneficios_empregados: float
+    pis_folha_pagamento: float
+    excedente_operacional_bruto: float
+    pessoal_ocupado: float
+    numero_empresas: float
 
-def carregar_dfs(path):
-    """
-    Função para retirar cada sheet presente no arqui xlsx,
-    e adicionar em um dicionario de dataframes
-    """
-    for arquivo in os.listdir(path):
-        if arquivo.endswith(".xlsx"):
-            file_path = os.path.join(path, arquivo)
-            xls = pd.ExcelFile(file_path)
-            sheet_renames = {
-                'Brasil; Telecomunicações': 'telecom',
-                'Brasil; Tecnologia da inform...': 'ti',
-                'Brasil; Serviços audiovisuais': 'serv_audiovisuais',
-                'Brasil; Edição e edição inte...': 'ed_e_ed_integradas_a_impressao',
-                'Brasil; Agências de notícias...': 'agencia_noticias',
-                'Notas': 'notas'
-            }
-            for sheet_name in xls.sheet_names:
+# Função de dependência para obter sessão de banco de dados
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-                if sheet_name in sheet_renames:
+# FastAPI app
+app = FastAPI()
 
-                    if sheet_name in sheet_renames.keys():
-                        df_nome = sheet_renames[sheet_name]
-                    else:
-                        df_nome = sheet_name  
+# CRUD Operations (aplica para todas as tabelas)
+@app.post("/data/{table}/", response_model=DataEntry)
+def create_data(table: str, data_entry: DataEntry, db: Session = Depends(get_db)):
+    model_class = globals().get(table.capitalize())
+    if not model_class:
+        raise HTTPException(status_code=404, detail="Table not found")
+    new_entry = model_class(**data_entry.dict())
+    db.add(new_entry)
+    db.commit()
+    db.refresh(new_entry)
+    return new_entry
 
-                    df = pd.read_excel(xls, sheet_name=sheet_name, skiprows=4)
-                    dataframes[df_nome] = df
-    
-def tratar_df(df):
-    
-    nomes_colunas = ['ano', 'receita_liquida','coef_var_receita_liquida',                             'custo_mercadorias', 'coef_var_custo_mercadorias','subvencoes_receitas_op',                                         'coef_var_subvencoes_receitas', 'valor_bruto_producao','coef_var_valor_bruto_producao',                                        'consumo_intermediario_total', 'coef_var_consumo_intermediario_total',                                         'consumo_mercadorias_reposicao', 'coef_var_consumo_mercadorias_reposicao',                                        'consumo_combustiveis', 'coef_var_combustiveis', 'consumo_servicos_terceiros',                                        'coef_var_servicos_terceiros', 'consumo_alugueis_imoveis','coef_var_alugueis_imoveis',                                        'consumo_seguros', 'coef_var_seguros', 'consumo_comunicacao', 'coef_var_comunicacao',                                        'consumo_energia_gas_agua', 'coef_var_energia_gas_agua', 'consumo_outros_custos',                                        'coef_var_outros_custos', 'valor_adicionado_bruto', 'coef_var_valor_adicionado_bruto',                                        'gastos_pessoal_total', 'coef_var_gastos_pessoal_total', 'gastos_salarios_remuneracoes',                                         'coef_var_salarios_remuneracoes', 'gastos_previdencia_social',                                         'coef_var_previdencia_social', 'gastos_fgts', 'coef_var_fgts',                                         'gastos_previdencia_privada', 'coef_var_previdencia_privada',                                         'gastos_indenizacoes_trabalhistas', 'coef_var_indenizacoes_trabalhistas',                                         'gastos_beneficios_empregados', 'coef_var_beneficios_empregados', 'pis_folha_pagamento',                                         'coef_var_pis_folha_pagamento', 'excedente_operacional_bruto',                                         'coef_var_excedente_operacional_bruto', 'pessoal_ocupado', 'coef_var_pessoal_ocupado',                                         'numero_empresas', 'coef_var_numero_empresas']
+@app.get("/data/{table}/", response_model=list[DataEntry])
+def get_data(table: str, db: Session = Depends(get_db)):
+    model_class = globals().get(table.capitalize())
+    if not model_class:
+        raise HTTPException(status_code=404, detail="Table not found")
+    data = db.query(model_class).all()
+    return data
 
-    colunas_selecionadas = [col for col in nomes_colunas if "coef" not in col]
-    
+@app.get("/data/{table}/{year}", response_model=DataEntry)
+def get_data_by_year(table: str, year: int, db: Session = Depends(get_db)):
+    model_class = globals().get(table.capitalize())
+    if not model_class:
+        raise HTTPException(status_code=404, detail="Table not found")
+    data = db.query(model_class).filter(model_class.ano == year).first()
+    if not data:
+        raise HTTPException(status_code=404, detail="Data not found")
+    return data
 
-    if len(nomes_colunas) == len(df.columns):
-        df.columns = nomes_colunas
+@app.put("/data/{table}/{year}", response_model=DataEntry)
+def update_data(table: str, year: int, data_entry: DataEntry, db: Session = Depends(get_db)):
+    model_class = globals().get(table.capitalize())
+    if not model_class:
+        raise HTTPException(status_code=404, detail="Table not found")
+    existing_data = db.query(model_class).filter(model_class.ano == year).first()
+    if not existing_data:
+        raise HTTPException(status_code=404, detail="Data not found")
+    for key, value in data_entry.dict().items():
+        setattr(existing_data, key, value)
+    db.commit()
+    db.refresh(existing_data)
+    return existing_data
 
-    df = df[colunas_selecionadas]
-        
-    df = df.iloc[:-1, :]
+@app.delete("/data/{table}/{year}", response_model=dict)
+def delete_data(table: str, year: int, db: Session = Depends(get_db)):
+    model_class = globals().get(table.capitalize())
+    if not model_class:
+        raise HTTPException(status_code=404, detail="Table not found")
+    data = db.query(model_class).filter(model_class.ano == year).first()
+    if not data:
+        raise HTTPException(status_code=404, detail="Data not found")
+    db.delete(data)
+    db.commit()
+    return {"detail": "Data deleted successfully"}
 
-    df['ano'] = pd.to_datetime(df['ano'])
-    df['ano'] = df['ano'].dt.year
-
-    colunas_selecionadas= [col for col in df.columns if "ano" not in col]
-    df[df.isin(['-', "..."])] = np.nan
-    df[colunas_selecionadas].apply(pd.to_numeric)
-
-    for col in colunas_selecionadas:
-        if df[col].dtype != "float64":
-            df[col] = pd.to_numeric(df[col])
-        df[col] = df[col] * 1000
-
-    for col in colunas_selecionadas:
-        replace_outliers_by_median(df[colunas_selecionadas], col)
-        df[col].fillna(df[col].median(), inplace=True)
-    return df
-
-executar_sql('./db/create_tables.sql');
-
-carregar_dfs('./datasets/')    
-
-for key,value in dataframes.items():
-    if key != "notas":
-        dataframes_atualizados[key] = tratar_df(value)
-
-
-for key,value in dataframes_atualizados.items():
-    value.to_sql(f'{key}', engine, index=False)
+# Iniciar o servidor FastAPI
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
