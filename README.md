@@ -25,13 +25,17 @@ Neste projeto foi utilizado o postgreSQL
 2. Instale as dependências do arquivo requirements.txt
    ```bash
    pip install -r requirements.txt
-3. Execute o scrip que é responsável por fazer a criação das tabelas no postgres
+
+3. Instale o postgres na sua máquina
+4. faça um arquivo chamado .env
+5. Coloque as variáveis locais relevantes para o script da sua máquina
+6. Execute o scrip que é responsável por fazer a criação das tabelas no postgres
    ```bash
    python criacao_tabelas.py
-4. Execute o script responsável pela pipeline de ETL
+7. Execute o script responsável pela pipeline de ETL
    ```bash
    python main.py
-5. Veja o lado legal da força em ação:
+8. Veja o lado legal da força em ação:
 
 ![dath_vader_local_nevando](https://www.icegif.com/wp-content/uploads/2022/09/icegif-1012.gif)
 
