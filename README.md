@@ -1,7 +1,7 @@
 # Desafio ETL Begginer
 
 ![Licença usada](https://img.shields.io/github/license/DaviMacielCavalcante/desafio_etl_begginer)
-![Linguagem](https://img.shields.io/badge/Linguagem-Python-blue)
+![Python](https://img.shields.io/badge/Python-3.12.4-blue)
 ![Status](https://img.shields.io/badge/Status-Finalizado-brightgreen)
 ![Banco de Dados](https://img.shields.io/badge/Banco%20de%20Dados-PostgreSQL-blue)
 
