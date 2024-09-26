@@ -1,5 +1,11 @@
 # Desafio ETL Begginer
 
+![Licença usada](https://img.shields.io/github/license/DaviMacielCavalcante/desafio_etl_begginer)
+![Linguagem](https://img.shields.io/badge/Linguagem-Python-blue)
+![Status](https://img.shields.io/badge/Status-Finalizado-brightgreen)
+![Banco de Dados](https://img.shields.io/badge/Banco%20de%20Dados-PostgreSQL-blue)
+
+
 ## Descrição
 Este projeto foi desenvolvido como parte de um desafio de ETL para iniciantes. O objetivo é extrair, transformar e carregar dados de um arquivo csv e carregá-los em um banco de dados local. 
 Neste projeto foi utilizado o postgreSQL
