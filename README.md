@@ -42,11 +42,11 @@ Neste projeto foi utilizado o postgreSQL
 ## Contribuição
 Contribuições são bem-vindas! Por favor, siga estas diretrizes:
 
-Faça um fork do projeto.
-Crie uma branch para a funcionalidade que deseja implementar (git checkout -b minha-nova-feature).
-Faça os commits com boas descrições (git commit -m 'Adiciona nova feature').
-Faça um push para a branch criada (git push origin minha-nova-feature).
-Abra um pull request para revisão.
+- Faça um fork do projeto.
+- Crie uma branch para a funcionalidade que deseja implementar (git checkout -b minha-nova-feature).
+- Faça os commits com boas descrições (git commit -m 'Adiciona nova feature').
+- Faça um push para a branch criada (git push origin minha-nova-feature).
+- Abra um pull request para revisão.
 
 ## Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE.md para mais detalhes.
@@ -58,6 +58,11 @@ e-mail: davicc@outlook.com.br
 
 ## Lordes Sith responsáveis pelo projeto
 - Darth Davi ⚔️😡
+
+## Mentora que propôs o desafio:
+[Profa. Artemisia Weyl](https://www.linkedin.com/in/arteweyl/)
+
+Github da mentora: https://github.com/arteweyl
 
 *Through victory, my chains are broken.
 <br>
