@@ -1,4 +1,3 @@
-
 CREATE OR REPLACE FUNCTION criar_tabelas(nomes TEXT[]) 
 RETURNS VOID AS $$
 DECLARE 
@@ -7,7 +6,7 @@ BEGIN
 	FOREACH nome IN ARRAY nomes
 	LOOP
 		EXECUTE format('
-			CREATE TABLE %I (
+			CREATE TABLE IF NOT EXISTS %I (
 			id SERIAL PRIMARY KEY,
 			ano INT UNIQUE NOT NULL,
 			receita_liquida NUMERIC(12,2) NOT NULL,	
